@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.24.0 FATAL_ERROR)
 project(CMAKE_Template_Lib LANGUAGES CXX VERSION 0.0.1)
 
 set(Target "Template_Lib")        # library name
-set(STANDARD 17)                  # C++ Standard
+set(STANDARD 20)                  # C++ Standard
 set(ARCHITECTURE "native")        # CPU architecture to optimize for (only relevant if OPTIMIZE_FOR_ARCHITECTURE is ON)
 
 # options
@@ -42,22 +42,22 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 include(CTest)
 include(ClangFormat.cmake)
 
-if (CLANG_TIDY)
+if(CLANG_TIDY)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        if (${CLANG_TIDY_NO_ERRORS})
-            set(CLANG_TIDY_CONFIG_FILE ${CMAKE_SOURCE_DIR}/.clang-tidy-noerrors)
-        else ()
-            set(CLANG_TIDY_CONFIG_FILE ${CMAKE_SOURCE_DIR}/.clang-tidy)
-        endif ()
+        if (${CLANG_TIDY_NO_ERRORS}) 
+            set (CLANG_TIDY_CONFIG_FILE ${CMAKE_SOURCE_DIR}/.clang-tidy-noerrors)
+        else()
+            set (CLANG_TIDY_CONFIG_FILE ${CMAKE_SOURCE_DIR}/.clang-tidy)
+        endif()
 
         set(CMAKE_CXX_CLANG_TIDY
                 clang-tidy
                 -config-file=${CLANG_TIDY_CONFIG_FILE})
         message(STATUS "clang-tidy enabled: ${CLANG_TIDY_CONFIG_FILE}")
-    else ()
+    else()
         message(WARNING "clang-tidy requested, but only available if clang is selected as compiler")
-    endif ()
-endif ()
+    endif()
+endif()
 
 if (STATIC_LIB)
     add_library(${Target} STATIC)
@@ -95,35 +95,18 @@ if (NOT STANDALONE_PROJECT)
     unset(COMPILER_WARNINGS)
 endif ()
 
-# options that are valid for gcc and clang
-function(commonopts)
-    # more debugging information
-    if (OPTIMIZE_DEBUG)
-        SET(CMAKE_CXX_FLAGS_DEBUG "-g3 -O3")
-    else ()
-        SET(CMAKE_CXX_FLAGS_DEBUG "-g3")
-    endif ()
-
-    if (MAKE_32_BIT_BINARY)
-        message(STATUS "Compiling as 32 bit binary.")
-        target_compile_options(${Target} PUBLIC -m32)
-    endif ()
-
-    if (ENABLE_MULTITHREADING AND OPENMP)
-        message(STATUS "openmp enabled")
-        target_compile_options(${Target} PUBLIC -fopenmp)
-    endif ()
-
-    if (OPTIMIZE_FOR_ARCHITECTURE)
-        message(STATUS "using architecture specific code generator: ${ARCHITECTURE}")
-        target_compile_options(${Target} PUBLIC -march=${ARCHITECTURE})
-    endif ()
-endfunction()
-
+set_definitions(${Target})
+if (ENABLE_MULTITHREADING AND OPENMP)
+    set_options(${Target} ON)
+else ()
+    set_options(${Target} OFF)
+endif ()
 
 if (COMPILER_WARNINGS)
+    enable_warnings(${Target})
     message(STATUS "Compiler warnings enabled.")
 else ()
+    disable_warnings(${Target})
     message(STATUS "Compiler warnings disabled.")
 endif ()
 
@@ -182,3 +165,27 @@ if (CLANG_FORMAT)
         message(WARNING "Clang format enabled, but file ${CLANG_FORMAT_FILE}  does not exist")
     endif ()
 endif ()
+
+# generate version_info.cpp
+# output is not the acutal generated file --> command is always executed
+add_custom_command(
+    OUTPUT
+        ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp
+
+    COMMAND
+        bash ${CMAKE_SOURCE_DIR}/scripts/gen_version_info_cpp.sh ${PROJECT_NAME}
+
+    WORKING_DIRECTORY
+        ${CMAKE_SOURCE_DIR}
+)
+
+execute_process(
+    COMMAND bash "${CMAKE_SOURCE_DIR}/scripts/gen_version_info_cpp.sh" ${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_custom_target(${Target}_generated_version_info
+    DEPENDS ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp
+)
+
+add_dependencies(${Target} ${Target}_generated_version_info)
