@@ -8,6 +8,6 @@
 #include <iostream>
 
 int lib_main() {
-    std::cout << "Hello from CMake Lib!!!" << std::endl;
+    std::cout << "Hello from CMake Lib!!!\n";
     return 0;
 }
