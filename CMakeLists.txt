@@ -13,7 +13,6 @@ project(CMAKE_Template_Lib LANGUAGES CXX VERSION 0.0.1)
 
 set(Target "Template_Lib")        # library name
 set(STANDARD 20)                  # C++ Standard
-set(ARCHITECTURE "native")        # CPU architecture to optimize for (only relevant if OPTIMIZE_FOR_ARCHITECTURE is ON)
 
 # options
 option(BUILD_DOC "Build documentation" ON)
@@ -26,9 +25,11 @@ option(CLANG_FORMAT "use clang-format" ON)
 option(CLANG_TIDY "use clang-tidy" ON)
 option(CLANG_TIDY_NO_ERRORS "do not treat clang-tidy warnings as errors" ON)
 option(OPTIMIZE_FOR_ARCHITECTURE "enable optimizations for specified architecture" OFF)
+option(ARCHITECTURE "CPU architecture to optimize for" "native")
 option(COMPILER_EXTENSIONS "enable compiler specific C++ extensions" OFF)
 option(ENABLE_TEST "enable test builds" ON)
 option(STATIC_LIB "build static library" OFF)
+option(INSTAL_LIB "add library to install target" ON)
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -63,6 +64,10 @@ if (STATIC_LIB)
     add_library(${Target} STATIC)
 else ()
     add_library(${Target} SHARED)
+endif ()
+
+if (INSTAL_LIB)
+    install(TARGETS ${Target})
 endif ()
 
 # set source and include directory
