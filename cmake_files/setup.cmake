@@ -6,7 +6,6 @@
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 include(CTest)
-include(ClangFormat.cmake)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
@@ -66,7 +65,7 @@ if (INSTAL_LIB)
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cxxshm
     )
 
-    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake_files/Config.cmake.in
         "${CMAKE_CURRENT_BINARY_DIR}/${Target}Config.cmake"
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${Target}
     )
@@ -95,9 +94,9 @@ target_include_directories(${Target} PUBLIC
 
 # ----------------------------------------------- warnings, compiler definitions and otions ----------------------------
 # ======================================================================================================================
-include(warnings.cmake)
-include(define.cmake)
-include(compileropts.cmake)
+include(cmake_files/warnings.cmake)
+include(cmake_files/define.cmake)
+include(cmake_files/compileropts.cmake)
 
 # force C++ Standard and disable/enable compiler specific extensions
 set_target_properties(${Target} PROPERTIES
@@ -180,7 +179,7 @@ if (CLANG_FORMAT AND NOT STANDALONE_PROJECT)
     set(CLANG_FORMAT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format)
 
     if (EXISTS ${CLANG_FORMAT_FILE})
-        include(ClangFormat.cmake)
+        include(cmake_files/ClangFormat.cmake)
         target_clangformat_setup(${Target})
         message(STATUS "Added clang format target(s)")
     else ()
