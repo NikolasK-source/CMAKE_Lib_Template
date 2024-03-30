@@ -43,6 +43,10 @@ endif ()
 
 if (INSTAL_LIB)
     install(TARGETS ${Target})
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+            DESTINATION include
+            FILES_MATCHING PATTERN "*.h*"
+    )
 endif ()
 
 # ----------------------------------------------- set source and include directory -------------------------------------
