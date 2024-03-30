@@ -88,7 +88,10 @@ endif ()
 # ======================================================================================================================
 add_subdirectory(src)
 add_subdirectory(include)
-target_include_directories(${Target} PUBLIC include)
+target_include_directories(${Target} PUBLIC  
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>  
+    $<INSTALL_INTERFACE:include>  # <prefix>/include
+)
 
 # ----------------------------------------------- warnings, compiler definitions and otions ----------------------------
 # ======================================================================================================================
