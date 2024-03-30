@@ -7,6 +7,8 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 
 include(CTest)
 include(ClangFormat.cmake)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
 
 # Determine whether this is a standalone project or included by other projects
 set(STANDALONE_PROJECT OFF)
@@ -42,10 +44,43 @@ else ()
 endif ()
 
 if (INSTAL_LIB)
-    install(TARGETS ${Target})
-    install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/
-            DESTINATION include
-            FILES_MATCHING PATTERN "*.h*"
+    install(
+        TARGETS ${Target}
+        EXPORT ${Target}Targets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    )
+
+    install(
+        DIRECTORY ${CMAKE_SOURCE_DIR}/include/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+        FILES_MATCHING PATTERN "*.h*"
+    )
+
+    install(
+        EXPORT ${Target}Targets
+        FILE ${Target}Targets.cmake
+        NAMESPACE "${Target}::"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/cxxshm
+    )
+
+    configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/${Target}Config.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${Target}
+    )
+
+    write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/${Target}ConfigVersion.cmake"
+        VERSION "${version}"
+        COMPATIBILITY AnyNewerVersion
+    )
+
+    install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${Target}Config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${Target}ConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${Target}
     )
 endif ()
 
