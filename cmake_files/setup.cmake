@@ -187,6 +187,8 @@ endif ()
 add_custom_command(
     OUTPUT
         ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp  # file does not exist --> command is always executed
+
+    BYPRODUCTS
         ${CMAKE_SOURCE_DIR}/src/generated/version_info.cpp
         ${CMAKE_SOURCE_DIR}/include/${Target}_version_info.hpp
 
