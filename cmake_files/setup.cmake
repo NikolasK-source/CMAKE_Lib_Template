@@ -183,11 +183,12 @@ if (CLANG_FORMAT AND NOT STANDALONE_PROJECT)
     endif ()
 endif ()
 
-# generate version_info.cpp
-# output is not the acutal generated file --> command is always executed
+# generate version_info.{c,h}pp
 add_custom_command(
     OUTPUT
-        ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp
+        ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp  # file does not exist --> command is always executed
+        ${CMAKE_SOURCE_DIR}/src/generated/version_info.cpp
+        ${CMAKE_SOURCE_DIR}/include/${Target}_version_info.hpp
 
     COMMAND
         bash ${CMAKE_SOURCE_DIR}/scripts/gen_version_info_cpp.sh ${PROJECT_NAME}
