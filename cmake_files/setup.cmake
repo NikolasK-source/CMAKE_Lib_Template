@@ -3,8 +3,6 @@
 # This program is free software. You can redistribute it and/or modify it under the terms of the MIT License.
 #
 
-set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-
 include(CTest)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
@@ -15,20 +13,25 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
     set(STANDALONE_PROJECT ON)
 endif ()
 
+# warnings as errors
+if (WERROR AND COMPILER_WARNINGS AND STANDALONE_PROJECT)
+	set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
+endif ()
+
 # ----------------------------------------------- clang-tidy -----------------------------------------------------------
 # ======================================================================================================================
-if(CLANG_TIDY AND COMPILER_WARNINGS)
+if (CLANG_TIDY AND COMPILER_WARNINGS)
     if (${CLANG_TIDY_NO_ERRORS}) 
-        set (CLANG_TIDY_CONFIG_FILE ${CMAKE_SOURCE_DIR}/.clang-tidy-noerrors)
-    else()
-        set (CLANG_TIDY_CONFIG_FILE ${CMAKE_SOURCE_DIR}/.clang-tidy)
-    endif()
+        set (CLANG_TIDY_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy-noerrors)
+    else ()
+        set (CLANG_TIDY_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/.clang-tidy)
+    endif ()
 
     set(CMAKE_CXX_CLANG_TIDY
             clang-tidy
             -config-file=${CLANG_TIDY_CONFIG_FILE})
     message(STATUS "clang-tidy enabled: ${CLANG_TIDY_CONFIG_FILE}")
-endif()
+endif ()
 
 # ----------------------------------------------- library target -------------------------------------------------------
 # ======================================================================================================================
@@ -106,11 +109,6 @@ if (ENABLE_TEST AND STANDALONE_PROJECT)
     add_subdirectory(test)
 endif ()
 
-# disable compiler warnings if project is not a standalone project
-if (NOT STANDALONE_PROJECT)
-    unset(COMPILER_WARNINGS)
-endif ()
-
 set_definitions(${Target})
 if (ENABLE_MULTITHREADING AND OPENMP)
     set_options(${Target} ON)
@@ -135,7 +133,7 @@ endif ()
 
 # ----------------------------------------------- doxygen documentation ------------------------------------------------
 # ======================================================================================================================
-if (BUILD_DOC AND NOT STANDALONE_PROJECT)
+if (BUILD_DOC AND STANDALONE_PROJECT)
     # doxygen documentation (https://vicrucann.github.io/tutorials/quick-cmake-doxygen/)
     # check if Doxygen is installed
     find_package(Doxygen)
@@ -150,7 +148,7 @@ if (BUILD_DOC AND NOT STANDALONE_PROJECT)
             message(STATUS "Doxygen configured")
 
             # note the option ALL which allows to build the docs together with the application
-            add_custom_target(doc_doxygen_${Target} ALL
+            add_custom_target(doc_doxygen_${Target}
                     COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
                     COMMENT "Generating API documentation with Doxygen"
@@ -171,12 +169,17 @@ if (BUILD_DOC AND NOT STANDALONE_PROJECT)
 endif ()
 
 # add clang format target
-if (CLANG_FORMAT AND NOT STANDALONE_PROJECT)
+if (CLANG_FORMAT AND STANDALONE_PROJECT)
     set(CLANG_FORMAT_FILE ${CMAKE_CURRENT_SOURCE_DIR}/.clang-format)
 
     if (EXISTS ${CLANG_FORMAT_FILE})
         include(cmake_files/ClangFormat.cmake)
         target_clangformat_setup(${Target})
+
+        if (FORCE_CLANG_FORMAT)
+            add_dependencies(${Target} ${Target}_clangformat)
+        endif ()
+
         message(STATUS "Added clang format target(s)")
     else ()
         message(WARNING "Clang format enabled, but file ${CLANG_FORMAT_FILE}  does not exist")
@@ -186,26 +189,26 @@ endif ()
 # generate version_info.{c,h}pp
 add_custom_command(
     OUTPUT
-        ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp  # file does not exist --> command is always executed
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/generated/version_info_cpp  # file does not exist --> command is always executed
 
     BYPRODUCTS
-        ${CMAKE_SOURCE_DIR}/src/generated/version_info.cpp
-        ${CMAKE_SOURCE_DIR}/include/${Target}_version_info.hpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/generated/version_info.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/${Target}_version_info.hpp
 
     COMMAND
-        bash ${CMAKE_SOURCE_DIR}/scripts/gen_version_info_cpp.sh ${PROJECT_NAME}
+        bash ${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen_version_info_cpp.sh ${PROJECT_NAME}
 
     WORKING_DIRECTORY
-        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 execute_process(
-    COMMAND bash "${CMAKE_SOURCE_DIR}/scripts/gen_version_info_cpp.sh" ${PROJECT_NAME}
+    COMMAND bash "${CMAKE_CURRENT_SOURCE_DIR}/scripts/gen_version_info_cpp.sh" ${PROJECT_NAME}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(${Target}_generated_version_info
-    DEPENDS ${CMAKE_SOURCE_DIR}/src/generated/version_info_cpp
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/src/generated/version_info_cpp
 )
 
 add_dependencies(${Target} ${Target}_generated_version_info)
