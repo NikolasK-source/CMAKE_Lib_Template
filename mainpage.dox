@@ -1,0 +1,15 @@
+/**
+@mainpage @PROJECT_NAME@
+
+@section intro Introduction
+
+@section repository Repository
+
+Project URL: @PROJECT_URL@
+
+@section license License
+
+This library is licensed under the MIT License.
+
+Copyright (c) 2026 Nikolas Koesling
+*/

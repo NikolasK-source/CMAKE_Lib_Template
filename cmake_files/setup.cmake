@@ -134,6 +134,15 @@ endif ()
 # ----------------------------------------------- doxygen documentation ------------------------------------------------
 # ======================================================================================================================
 if (BUILD_DOC AND STANDALONE_PROJECT)
+    # project URL for doxygen (set by CI or fallback to placeholder)
+    if (NOT DEFINED PROJECT_URL)
+        if (DEFINED ENV{CI_PROJECT_URL})
+            set(PROJECT_URL $ENV{CI_PROJECT_URL})
+        else ()
+            set(PROJECT_URL "https://example.com/project")
+        endif ()
+    endif ()
+
     # doxygen documentation (https://vicrucann.github.io/tutorials/quick-cmake-doxygen/)
     # check if Doxygen is installed
     find_package(Doxygen)
@@ -145,6 +154,7 @@ if (BUILD_DOC AND STANDALONE_PROJECT)
         if (EXISTS ${DOXYGEN_IN})
             # request to configure the file
             configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+            configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mainpage.dox ${CMAKE_CURRENT_BINARY_DIR}/mainpage.dox @ONLY)
             message(STATUS "Doxygen configured")
 
             # note the option ALL which allows to build the docs together with the application

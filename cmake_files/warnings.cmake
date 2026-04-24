@@ -37,6 +37,7 @@ function(gccwarn target)
 
     target_compile_options(${target} PRIVATE -Wno-error=switch-default)
     target_compile_options(${target} PRIVATE -Wno-error=attributes)
+    target_compile_options(${target} PRIVATE -Wno-c++20-extensions)
 endfunction()
 
 # clang specific warnings
@@ -62,6 +63,7 @@ function(clangwarn target)
     target_compile_options(${target} PRIVATE -Wno-nested-anon-types)
     target_compile_options(${target} PRIVATE -Wno-gnu-anonymous-struct)
     target_compile_options(${target} PRIVATE -Wno-source-uses-openmp)
+    target_compile_options(${target} PRIVATE -Wno-c++20-designator)
 
 endfunction()
 

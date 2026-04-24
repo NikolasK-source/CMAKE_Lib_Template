@@ -50,11 +50,11 @@ Checks:          'bugprone-*,
                   readability-static-definition-in-anonymous-namespace,
                   readability-string-compare,
                   readability-uniqueptr-delete-release,
-                  readability-use-anyofallof
+                  readability-use-anyofallof,
                   -modernize-use-trailing-return-type'
 WarningsAsErrors: '*,
                   -modernize-*,
-                  -readability-*
+                  -readability-*,
                   -cppcoreguidelines-avoid-magic-numbers,
                   -cppcoreguidelines-pro-type-vararg'
 HeaderFilterRegex: ''

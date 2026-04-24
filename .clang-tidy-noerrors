@@ -50,7 +50,7 @@ Checks:          'bugprone-*,
                   readability-static-definition-in-anonymous-namespace,
                   readability-string-compare,
                   readability-uniqueptr-delete-release,
-                  readability-use-anyofallof
+                  readability-use-anyofallof,
                   -modernize-use-trailing-return-type'
 WarningsAsErrors: ''
 HeaderFilterRegex: ''
